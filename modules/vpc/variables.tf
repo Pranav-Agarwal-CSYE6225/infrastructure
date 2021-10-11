@@ -1,9 +1,9 @@
-variable "vpc_cidr_block" {
+variable "cidr_block" {
   type        = string
   description = "CIDR for VPC"
 }
 
-variable "vpc_name" {
+variable "name" {
   type        = string
   description = "name for VPC"
 }
