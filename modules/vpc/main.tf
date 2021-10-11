@@ -1,11 +1,11 @@
 resource "aws_vpc" "vpc" {
-  cidr_block                       = var.vpc_cidr_block
+  cidr_block                       = var.cidr_block
   enable_dns_hostnames             = true
   enable_dns_support               = true
   enable_classiclink_dns_support   = true
   assign_generated_ipv6_cidr_block = false
   tags = {
-    Name = var.vpc_name
+    Name = var.name
   }
 }
 
@@ -20,7 +20,7 @@ resource "aws_subnet" "subnet" {
   availability_zone       = each.key
   map_public_ip_on_launch = true
   tags = {
-    Name = "csye6225-subnet-${each.key}" 
+    Name = "${var.name}-subnet-${each.key}" 
   }
 }
 
@@ -28,7 +28,7 @@ resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "main"
+    Name = "${var.name}-ig-main"
   }
 }
 

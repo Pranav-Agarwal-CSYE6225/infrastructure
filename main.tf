@@ -5,7 +5,7 @@ provider "aws" {
 
 module "vpcModule" {
   source         = "./modules/vpc"
-  vpc_name       = "vpc1"
-  vpc_cidr_block = "10.0.0.0/16"
-  subnet_map     = var.subnet_map
+  name       = var.vpc_name
+  cidr_block = var.vpc_cidr_block
+  subnet_map     = var.vpc_subnet_map
 }
