@@ -1,9 +1,7 @@
 resource "aws_vpc" "vpc" {
   cidr_block                       = var.cidr_block
-  enable_dns_hostnames             = true
-  enable_dns_support               = true
-  enable_classiclink_dns_support   = true
-  assign_generated_ipv6_cidr_block = false
+  enable_dns_hostnames             = var.enable_dns_hostnames
+  enable_classiclink_dns_support   = var.enable_classiclink_dns_support
   tags = {
     Name = var.name
   }
