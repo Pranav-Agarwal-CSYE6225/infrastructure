@@ -18,7 +18,87 @@ resource "aws_subnet" "subnet" {
   availability_zone       = each.key
   map_public_ip_on_launch = true
   tags = {
-    Name = "${var.name}-subnet-${each.key}" 
+    Name = "${var.name}-subnet-${each.key}"
+  }
+}
+
+resource "aws_security_group" "application" {
+  name        = "application"
+  description = "security group for the webapp"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress = [
+    {
+      description = "SSH"
+      from_port        = 22
+      to_port          = 22
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
+      security_groups = []
+      self = false
+    },
+    {
+      description = "HTTP"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
+      security_groups = []
+      self = false
+    },
+    {
+      description = "HTTPS"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
+      security_groups = []
+      self = false
+    },
+    {
+      description = "NODE"
+      from_port        = 5000
+      to_port          = 5000
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
+      security_groups = []
+      self = false
+    }
+  ]
+  tags = {
+    Name = "application"
+  }
+}
+
+resource "aws_security_group" "database" {
+  name        = "database"
+  description = "security group for the database"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress = [
+    {
+      description = "MYSQL"
+      from_port        = 3306
+      to_port          = 3306
+      protocol         = "tcp"
+      cidr_blocks      = [aws_vpc.vpc.cidr_block]
+      security_groups = [aws_security_group.application.name]
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
+      security_groups = []
+      self = false
+    }
+  ]
+  tags = {
+    Name = "database"
   }
 }
 

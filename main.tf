@@ -11,3 +11,16 @@ module "vpcModule" {
   enable_dns_hostnames           = var.vpc_enable_dns_hostnames
   enable_classiclink_dns_support = var.vpc_enable_classiclink_dns_support
 }
+
+module "rdsModule" {
+  source                         = "./modules/rds"
+  vpc_id = module.vpcModule.vpc_id
+  security_group_id = module.vpcModule.database_securitygroup_id
+}
+
+module "ec2Module" {
+  source                         = "./modules/ec2"
+  vpc_id = module.vpcModule.vpc_id
+  security_group_id = module.vpcModule.application_securitygroup_id
+}
+
