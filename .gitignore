@@ -13,6 +13,9 @@ crash.log
 # version control.
 #
 
+# Demo files
+demo/
+
 #var files
 dev.tfvars
 prod.tfvars

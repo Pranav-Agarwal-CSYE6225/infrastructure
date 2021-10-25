@@ -10,7 +10,7 @@ variable "aws_region" {
   description = "AWS region to create resources in"
 }
 
-// VPC - 1 VARS
+// VPC VARS
 
 variable "vpc_name" {
   type        = string
@@ -35,4 +35,38 @@ variable "vpc_enable_classiclink_dns_support" {
 variable "vpc_enable_dns_hostnames" {
   type        = bool
   description = "A boolean flag to enable/disable DNS hostnames in the VPC"
+}
+
+// RDS VARS
+
+variable "rds_identifier" {
+  type        = string
+}
+
+variable "rds_username" {
+  type        = string
+}
+
+variable "rds_password" {
+  type        = string
+}
+
+// S3 VARS
+
+variable "s3_domain" {
+  type        = string
+}
+
+variable "s3_name" {
+  type        = string
+}
+
+// EC2 VARS 
+
+variable "ec2_ami_id" {
+  type        = string
+}
+
+variable "ec2_ssh_key" {
+  type        = string
 }
