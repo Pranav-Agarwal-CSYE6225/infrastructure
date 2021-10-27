@@ -70,7 +70,9 @@ resource "aws_iam_policy" "policy" {
         {
             "Action": [
                 "sts:AssumeRole",
-                "s3:*"
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
             ],
             "Effect": "Allow",
             "Resource": [
