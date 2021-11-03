@@ -10,7 +10,12 @@ variable "security_group_id" {
 
 variable "s3_bucket" {
     type = string
-    description = "s3 bucket name for the ec2 instance"
+    description = "s3 image bucket name for the ec2 instance"
+}
+
+variable "codedeploy_bucket"{
+    type = string
+    description = "s3 codedeploy bucket name for the ec2 instance"
 }
 
 variable "ssh_key" {
@@ -36,4 +41,12 @@ variable "database_password" {
 variable "ami_id" {
     type = string
     description = "ami image to build the instance from"
+}
+
+variable "environment" {
+    type = string
+}
+
+variable "domain" {
+    type = string
 }

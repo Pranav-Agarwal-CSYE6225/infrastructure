@@ -70,3 +70,8 @@ variable "ec2_ami_id" {
 variable "ec2_ssh_key" {
   type        = string
 }
+
+variable "codedeploy_bucket"{
+    type = string
+    description = "s3 codedeploy bucket name for the ec2 instance"
+}
