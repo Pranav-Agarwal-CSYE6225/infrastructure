@@ -44,7 +44,7 @@ resource "aws_instance" "webapp" {
 }
 
 resource "aws_iam_role" "ec2_s3_access_role" {
-  name               = "s3-role"
+  name               = "S3EC2ServiceRole"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -60,9 +60,9 @@ resource "aws_iam_role" "ec2_s3_access_role" {
   })
 }
 
-resource "aws_iam_policy" "policy" {
-    name = "s3-policy"
-    description = "policy to access s3 buckets"
+resource "aws_iam_policy" "image_policy" {
+    name = "s3-image-policy"
+    description = "policy to access S3 bucket to store images"
     policy = <<-EOF
     {
     "Version": "2012-10-17",
@@ -86,12 +86,53 @@ resource "aws_iam_policy" "policy" {
 
 }
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
+resource "aws_iam_policy" "codedeploy_policy" {
+    name = "CodeDeploy-EC2-S3"
+    description = "policy to access S3 bucket to store codedeploy artifacts"
+    policy = <<-EOF
+    {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:Get*",
+                "s3:List*"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::${var.codedeploy_bucket}",
+                "arn:aws:s3:::${var.codedeploy_bucket}/*"
+            ]
+        }
+    ]
+    }
+    EOF
+
+}
+
+resource "aws_iam_role_policy_attachment" "attach_image" {
   role       = aws_iam_role.ec2_s3_access_role.name
-  policy_arn = aws_iam_policy.policy.arn
+  policy_arn = aws_iam_policy.image_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "attach_codedeploy" {
+  role       = aws_iam_role.ec2_s3_access_role.name
+  policy_arn = aws_iam_policy.codedeploy_policy.arn
 }
 
 resource "aws_iam_instance_profile" "s3_profile" {                             
     name  = "s3_profile"                         
     role = aws_iam_role.ec2_s3_access_role.name
+}
+
+data "aws_route53_zone" "selected" {
+  name         = "${var.environment}.${var.domain}"
+}
+
+resource "aws_route53_record" "www" {
+  zone_id = data.aws_route53_zone.selected.zone_id
+  name    = "${var.environment}.${var.domain}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.webapp.public_ip]
 }
