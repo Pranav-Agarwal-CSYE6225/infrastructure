@@ -97,17 +97,6 @@ resource "aws_security_group" "application" {
       security_groups = []
       self = false
     },
-    {
-      description = "SQL"
-      from_port        = 3306
-      to_port          = 3306
-      protocol         = "tcp"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids = []
-      security_groups = []
-      self = false
-    },
   ]
   tags = {
     Name = "application"
