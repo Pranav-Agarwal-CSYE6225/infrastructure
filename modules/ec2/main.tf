@@ -60,6 +60,40 @@ resource "aws_iam_role" "ec2_s3_access_role" {
   })
 }
 
+resource "aws_iam_policy" "cloudwatch_policy" {
+    name = "cloudwatch-policy"
+    description = "policy to use cloudwatch"
+    policy = <<-EOF
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "cloudwatch:PutMetricData",
+                    "ec2:DescribeVolumes",
+                    "ec2:DescribeTags",
+                    "logs:PutLogEvents",
+                    "logs:DescribeLogStreams",
+                    "logs:DescribeLogGroups",
+                    "logs:CreateLogStream",
+                    "logs:CreateLogGroup"
+                ],
+                "Resource": "*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ssm:GetParameter"
+                ],
+                "Resource": "arn:aws:ssm:*:*:parameter/AmazonCloudWatch-*"
+            }
+        ]
+    }
+    EOF
+
+}
+
 resource "aws_iam_policy" "image_policy" {
     name = "s3-image-policy"
     description = "policy to access S3 bucket to store images"
@@ -80,7 +114,7 @@ resource "aws_iam_policy" "image_policy" {
                 "arn:aws:s3:::${var.s3_bucket}/*"
             ]
         }
-    ]
+      ]
     }
     EOF
 
@@ -104,7 +138,7 @@ resource "aws_iam_policy" "codedeploy_policy" {
                 "arn:aws:s3:::${var.codedeploy_bucket}/*"
             ]
         }
-    ]
+      ]
     }
     EOF
 
