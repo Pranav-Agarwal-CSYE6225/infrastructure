@@ -8,6 +8,11 @@ variable "security_group_id" {
     description = "security group for ec2 instance"
 }
 
+variable "lb_security_group_id" {
+    type = string
+    description = "load balancer security group"
+}
+
 variable "s3_bucket" {
     type = string
     description = "s3 image bucket name for the ec2 instance"
@@ -38,15 +43,15 @@ variable "database_password" {
   description = "password for the RDS instance"
 }
 
-variable "ami_id" {
-    type = string
-    description = "ami image to build the instance from"
-}
-
 variable "environment" {
     type = string
 }
 
 variable "domain" {
     type = string
+}
+
+variable "dev_account_id"{
+    type = string
+    description = "dev account id to take ami from"
 }

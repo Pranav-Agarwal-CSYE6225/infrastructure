@@ -63,10 +63,6 @@ variable "s3_name" {
 
 // EC2 VARS 
 
-variable "ec2_ami_id" {
-  type        = string
-}
-
 variable "ec2_ssh_key" {
   type        = string
 }
@@ -74,4 +70,9 @@ variable "ec2_ssh_key" {
 variable "codedeploy_bucket"{
     type = string
     description = "s3 codedeploy bucket name for the ec2 instance"
+}
+
+variable "dev_account_id"{
+    type = string
+    description = "dev account id to take ami from"
 }
