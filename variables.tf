@@ -43,6 +43,10 @@ variable "rds_identifier" {
   type        = string
 }
 
+variable "rds_identifier_replica" {
+  type        = string
+}
+
 variable "rds_username" {
   type        = string
 }

@@ -17,6 +17,7 @@ module "rdsModule" {
   vpc_id = module.vpcModule.vpc_id
   security_group_id = module.vpcModule.database_securitygroup_id
   rds_identifier = var.rds_identifier
+  rds_identifier_replica = var.rds_identifier_replica
   username = var.rds_username
   password = var.rds_password
   depends_on = [
@@ -39,6 +40,7 @@ module "ec2Module" {
   s3_bucket = module.s3Module.s3_bucket
   codedeploy_bucket = var.codedeploy_bucket
   rds_identifier = var.rds_identifier
+  rds_identifier_replica = var.rds_identifier_replica
   database_username = var.rds_username
   database_password = var.rds_password
   environment = var.aws_profile
