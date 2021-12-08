@@ -1,4 +1,4 @@
 exports.handler = (event, context, callback) => {
-    console.log('hello world');
-    callback(null, 'It works');
+    console.log('Testing');
+    callback(null, 'Test Lambda function successful');
 }

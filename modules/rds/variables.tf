@@ -27,3 +27,7 @@ variable "password" {
   type        = string
   description = "password for the RDS instance"
 }
+variable "prod_account_id"{
+    type = string
+    description = "prod account id"
+}

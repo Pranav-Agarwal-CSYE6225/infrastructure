@@ -80,3 +80,8 @@ variable "dev_account_id"{
     type = string
     description = "dev account id to take ami from"
 }
+
+variable "prod_account_id"{
+    type = string
+    description = "prod account id"
+}
