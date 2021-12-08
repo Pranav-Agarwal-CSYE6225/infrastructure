@@ -10,6 +10,12 @@ resource "aws_db_subnet_group" "rds" {
 resource "aws_db_parameter_group" "rds" {
   name   = "rds"
   family = "mysql8.0"
+
+  parameter {
+	  name = "performance_schema" 
+    value = "1"
+    apply_method="pending-reboot"
+  }
 }
 
 resource "aws_kms_key" "rds_key" {
