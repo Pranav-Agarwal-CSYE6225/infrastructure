@@ -18,6 +18,7 @@ module "rdsModule" {
   security_group_id = module.vpcModule.database_securitygroup_id
   rds_identifier = var.rds_identifier
   rds_identifier_replica = var.rds_identifier_replica
+  prod_account_id = var.prod_account_id
   username = var.rds_username
   password = var.rds_password
   depends_on = [
@@ -47,6 +48,7 @@ module "ec2Module" {
   domain = var.s3_domain
   ssh_key = var.ec2_ssh_key
   dev_account_id = var.dev_account_id
+  prod_account_id = var.prod_account_id
     depends_on = [
       module.vpcModule,
       module.s3Module,

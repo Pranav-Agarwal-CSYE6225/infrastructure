@@ -74,7 +74,7 @@ resource "aws_codedeploy_deployment_group" "code_deploy_deployment_group" {
 }
 
 resource "aws_lb" "application-Load-Balancer" {
-  name               = "application-Load-Balancer"
+  name               = "load-balancer"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.lb_security_group_id]
@@ -85,26 +85,113 @@ resource "aws_lb" "application-Load-Balancer" {
   }
 }
 
-resource "aws_launch_configuration" "as_conf" {
-  name                   = "asg_launch_config"
-  image_id               = data.aws_ami.webapp_ami.id
-  instance_type          = "t2.micro"
-  security_groups        = [var.security_group_id]
-  key_name               = aws_key_pair.ssh_key.key_name
-  iam_instance_profile        = aws_iam_instance_profile.s3_profile.name
-  associate_public_ip_address = true
-  user_data = data.template_file.config_data.rendered
+resource "aws_kms_key" "ebs_key" {
+  description              = "EBS-key"
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Id": "key-default-1",
+    "Statement": [
+        {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                    "arn:aws:iam::${var.prod_account_id}:root",
+                    "arn:aws:iam::${var.prod_account_id}:user/dev"
+                ]
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+        },
+        {
+            "Sid": "Allow service-linked role use of the customer managed key",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::${var.prod_account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+            },
+            "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "Allow attachment of persistent resources",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::${var.prod_account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+            },
+            "Action": "kms:CreateGrant",
+            "Resource": "*",
+            "Condition": {
+                "Bool": {
+                    "kms:GrantIsForAWSResource": "true"
+                }
+            }
+        }
+    ]
+}
+EOF
+}
 
-  root_block_device {
-    volume_type           = "gp2"
-    volume_size           = 20
-    delete_on_termination = true
+// resource "aws_launch_configuration" "as_conf" {
+//   name                   = "asg_launch_config"
+//   image_id               = data.aws_ami.webapp_ami.id
+//   instance_type          = "t2.micro"
+//   security_groups        = [var.security_group_id]
+//   key_name               = aws_key_pair.ssh_key.key_name
+//   iam_instance_profile        = aws_iam_instance_profile.s3_profile.name
+//   associate_public_ip_address = true
+//   user_data = data.template_file.config_data.rendered
+
+//   root_block_device {
+//     volume_type           = "gp2"
+//     volume_size           = 20
+//     delete_on_termination = true
+//     encrypted             = true
+//     kms_key_id            = aws_kms_key.ebs_key.key_id
+//   }
+// }
+
+resource "aws_launch_template" "as_temp" {
+  name                                 = "as_temp"
+  image_id                             = data.aws_ami.webapp_ami.id
+  instance_type                        = "t2.micro"
+  vpc_security_group_ids = [var.security_group_id]
+  iam_instance_profile {
+    arn = aws_iam_instance_profile.s3_profile.arn
   }
+  key_name                             = aws_key_pair.ssh_key.key_name
+  block_device_mappings {
+    device_name = "/dev/sda1"
+
+    ebs {
+      volume_type           = "gp2"
+      volume_size = 20
+      delete_on_termination = true
+      encrypted = true
+      kms_key_id = aws_kms_key.ebs_key.arn
+    }
+  }
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name          = "Webapp"
+    }
+  }
+  user_data = base64encode(data.template_file.config_data.rendered)
 }
 
 resource "aws_autoscaling_group" "autoscaling" {
   name                 = "autoscaling-group"
-  launch_configuration = aws_launch_configuration.as_conf.name
+  launch_template {
+    id      = aws_launch_template.as_temp.id
+    version = aws_launch_template.as_temp.latest_version
+  }
   min_size             = 3
   max_size             = 5
   default_cooldown     = 60
@@ -137,10 +224,18 @@ resource "aws_lb_target_group" "albTargetGroup" {
   }
 }
 
-resource "aws_lb_listener" "front_end" {
+data "aws_acm_certificate" "sectigo_issued" {
+  domain      = "${var.environment}.${var.domain}"
+  statuses = ["ISSUED"]
+  types       = ["IMPORTED"]
+  most_recent = true
+}
+
+resource "aws_lb_listener" "lb_listener" {
   load_balancer_arn = aws_lb.application-Load-Balancer.arn
-  port              = "80"
-  protocol          = "HTTP"
+  port              = "443"
+  protocol          = "HTTPS"
+  certificate_arn = data.aws_acm_certificate.sectigo_issued.arn
 
   default_action {
     type             = "forward"
